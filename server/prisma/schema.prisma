@@ -1,0 +1,367 @@
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  DKVIB_ADMIN
+  FINANCE_OFFICER
+  ASSESSMENT_OFFICER
+  AGENCY
+  APPLICANT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ENROLLED
+  COMPLETED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum IdProofType {
+  AADHAAR
+  PAN
+  VOTER_ID
+  PASSPORT
+  DRIVING_LICENSE
+}
+
+enum AgencyApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum BatchStatus {
+  UPCOMING
+  RUNNING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentType {
+  STIPEND
+  FOOD_SUPPORT
+  TOTAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+}
+
+enum ProductApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  mobile    String   @unique
+  email     String?  @unique
+  password  String
+  role      UserRole
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicant   Applicant?
+  agency      Agency?
+  auditLogs   AuditLog[]
+  notifications Notification[]
+}
+
+model Applicant {
+  id            String            @id @default(uuid())
+  applicantId   String            @unique
+  userId        String            @unique
+  name          String
+  fatherMotherName String
+  dob           DateTime
+  gender        Gender
+  address       String
+  mobile        String            @unique
+  email         String?
+  bankAccount   String            @unique
+  ifscCode      String
+  bankName      String
+  accountHolder String
+  idProofType   IdProofType
+  idProofNumber String            @unique
+  trainingSector String
+  applicationStatus ApplicationStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batchApplicants    BatchApplicant[]
+  attendances        Attendance[]
+  assessments        Assessment[]
+  payments           Payment[]
+  certificate        Certificate?
+  benefit            Benefit?
+  products           Product[]
+  trainingHistories  TrainingHistory[]
+
+  @@index([mobile, dob, bankAccount, idProofNumber])
+}
+
+model Agency {
+  id              String               @id @default(uuid())
+  userId          String               @unique
+  agencyName      String
+  registrationNo  String               @unique
+  address         String
+  contactPerson   String
+  mobile          String
+  email           String
+  infrastructure  String
+  experience      Int
+  sectors         String[]
+  documents       String[]
+  approvalStatus  AgencyApprovalStatus @default(PENDING)
+  approvedAt      DateTime?
+  approvedBy      String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainers   Trainer[]
+  batches    Batch[]
+}
+
+model Trainer {
+  id        String   @id @default(uuid())
+  agencyId  String
+  name      String
+  mobile    String
+  sector    String
+  experience Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agency   Agency  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  batches  Batch[]
+}
+
+model Batch {
+  id          String      @id @default(uuid())
+  batchCode   String      @unique
+  agencyId    String
+  trainerId   String?
+  sector      String
+  startDate   DateTime
+  endDate     DateTime
+  totalSeats  Int
+  venue       String
+  status      BatchStatus @default(UPCOMING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  agency          Agency           @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  trainer         Trainer?         @relation(fields: [trainerId], references: [id], onDelete: SetNull)
+  batchApplicants BatchApplicant[]
+  attendances     Attendance[]
+  assessments     Assessment[]
+  trainingPhotos  TrainingPhoto[]
+}
+
+model BatchApplicant {
+  batchId     String
+  applicantId String
+  enrolledAt  DateTime @default(now())
+
+  batch     Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+
+  @@id([batchId, applicantId])
+}
+
+model Attendance {
+  id          String   @id @default(uuid())
+  batchId     String
+  applicantId String
+  date        DateTime
+  dayNumber   Int
+  present     Boolean  @default(false)
+  otpVerified Boolean  @default(false)
+  photoUrl    String?
+  geoLocation String?
+  markedBy    String?
+  createdAt   DateTime @default(now())
+
+  batch     Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, applicantId, date])
+}
+
+model Assessment {
+  id            String   @id @default(uuid())
+  applicantId   String
+  batchId       String
+  assessmentDate DateTime
+  practicalMarks Int
+  theoryMarks   Int
+  totalMarks    Int
+  passFail      Boolean
+  assessedBy    String?
+  remarks       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  batch     Batch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  applicantId   String
+  amount        Int
+  paymentType   PaymentType
+  transactionId String        @unique
+  utrNumber     String?
+  status        PaymentStatus @default(PENDING)
+  paymentDate   DateTime?
+  processedBy   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+}
+
+model Certificate {
+  id               String   @id @default(uuid())
+  certificateNo    String   @unique
+  applicantId      String   @unique
+  issueDate        DateTime
+  qrCode           String
+  verificationUrl  String
+  pdfUrl           String
+  issuedBy         String?
+  createdAt        DateTime @default(now())
+
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+}
+
+model Benefit {
+  id                  String   @id @default(uuid())
+  applicantId         String   @unique
+  certificateIssued   Boolean  @default(false)
+  certificateDate     DateTime?
+  identityCardIssued  Boolean  @default(false)
+  identityCardDate    DateTime?
+  sewingMachineIssued Boolean  @default(false)
+  sewingMachineDate   DateTime?
+  machineSerialNo     String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id               String                 @id @default(uuid())
+  applicantId      String
+  productName      String
+  sector           String
+  description      String
+  photoUrls        String[]
+  cost             Int
+  contactDetails   String
+  approvalStatus   ProductApprovalStatus  @default(PENDING)
+  approvedBy       String?
+  approvedAt       DateTime?
+  publishedAt      DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+}
+
+model TrainingHistory {
+  id          String   @id @default(uuid())
+  applicantId String
+  sector      String
+  batchCode   String
+  completedAt DateTime
+  status      String
+  createdAt   DateTime @default(now())
+
+  applicant Applicant @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String
+  action      String
+  module      String
+  description String?
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TrainingPhoto {
+  id        String   @id @default(uuid())
+  batchId   String
+  photoUrl  String
+  caption   String?
+  uploadedBy String?
+  uploadedAt DateTime @default(now())
+
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OtpStore {
+  id        String   @id @default(uuid())
+  mobile    String
+  otp       String
+  purpose   String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([mobile, purpose])
+}
+
