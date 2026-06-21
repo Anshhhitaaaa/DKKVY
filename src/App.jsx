@@ -14,6 +14,21 @@ import ApplicantDashboard from './pages/ApplicantDashboard';
 import ApplicantProfile from './pages/ApplicantProfile';
 import AgencyDashboard from './pages/AgencyDashboard';
 import ProtectedRoute from './routes/ProtectedRoute';
+import Agencies from './pages/Agencies';
+import Batches from './pages/Batches';
+import Attendance from './pages/Attendance';
+import Assessment from './pages/Assessment';
+import Stipend from './pages/Stipend';
+import Payments from './pages/Payments';
+import Certificates from './pages/Certificates';
+import Benefits from './pages/Benefits';
+import Catalogue from './pages/Catalogue';
+import Sectors from './pages/Sectors';
+import Audit from './pages/Audit';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+import Users from './pages/Users';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -25,9 +40,11 @@ function App() {
         <Route path="/applicant-registration" element={<ApplicantRegistration />} />
         <Route path="/agency-registration" element={<AgencyRegistration />} />
         <Route path="/registration/success" element={<RegistrationSuccess />} />
-          <Route path="/applicant-dashboard" element={<ApplicantDashboard />} />
-          <Route path="/agency-dashboard" element={<AgencyDashboard />} />
-          <Route path="/applicant-profile" element={<ApplicantProfile />} />
+        <Route path="/applicant-dashboard" element={<ApplicantDashboard />} />
+        <Route path="/agency-dashboard" element={<AgencyDashboard />} />
+        <Route path="/applicant-profile" element={<ApplicantProfile />} />
+        
+        {/* Admin Routes */}
         <Route
           path="/dashboard"
           element={
@@ -45,10 +62,130 @@ function App() {
           }
         />
         <Route
+          path="/agencies"
+          element={
+            <ProtectedRoute>
+              <Agencies />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/batches"
+          element={
+            <ProtectedRoute>
+              <Batches />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance"
+          element={
+            <ProtectedRoute>
+              <Attendance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/assessment"
+          element={
+            <ProtectedRoute>
+              <Assessment />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stipend"
+          element={
+            <ProtectedRoute>
+              <Stipend />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/certificates"
+          element={
+            <ProtectedRoute>
+              <Certificates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/benefits"
+          element={
+            <ProtectedRoute>
+              <Benefits />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/catalogue"
+          element={
+            <ProtectedRoute>
+              <Catalogue />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sectors"
+          element={
+            <ProtectedRoute>
+              <Sectors />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/reports"
           element={
             <ProtectedRoute>
               <Reports />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/audit"
+          element={
+            <ProtectedRoute>
+              <Audit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <Users />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />

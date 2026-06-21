@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
+import { loginAdmin } from '../services/adminService';
 
 const Login = () => {
   const [formData, setFormData] = useState({ loginId: '', password: '', role: 'DKKVY_ADMIN' });
@@ -21,26 +22,37 @@ const Login = () => {
     setError('');
     
     try {
-      const response = await api.post('/auth/login', formData);
-      const { token, user, role } = response.data;
+      let response;
       
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('accessToken', token);
+      if (formData.role === 'DKKVY_ADMIN') {
+        // Admin login uses admin ID and password
+        response = await loginAdmin(formData.loginId, formData.password);
+      } else {
+        // Applicant and Agency use loginId and password
+        response = await api.post('/auth/login', formData);
+      }
+      
+      const { token, user, role, data } = response.data;
+      const authUser = user || data;
+      const authToken = token;
+      
+      localStorage.setItem('user', JSON.stringify(authUser));
+      localStorage.setItem('accessToken', authToken);
       
       dispatch({
         type: 'auth/login/fulfilled',
-        payload: { user, accessToken: token, refreshToken: 'mock-refresh' }
+        payload: { user: authUser, accessToken: authToken, refreshToken: 'mock-refresh' }
       });
 
-      if (role === 'AGENCY') {
+      if (formData.role === 'AGENCY') {
         navigate('/agency-dashboard');
-      } else if (role === 'APPLICANT') {
+      } else if (formData.role === 'APPLICANT') {
         navigate('/applicant-dashboard');
       } else {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -83,6 +95,7 @@ const Login = () => {
               <option value="APPLICANT">Applicant</option>
             </select>
           </div>
+          
           <div>
             <label className="block text-sm font-bold text-gray-900 mb-2">Login ID</label>
             <input
@@ -95,6 +108,7 @@ const Login = () => {
               required
             />
           </div>
+          
           <div>
             <label className="block text-sm font-bold text-gray-900 mb-2">Password</label>
             <input

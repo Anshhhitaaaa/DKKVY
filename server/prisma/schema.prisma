@@ -1,98 +1,156 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model Admin {
-  id        String   @id @default(cuid())
-  loginId   String   @unique
-  password  String
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model applicants {
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  applicant_id        String           @unique @db.VarChar(20)
+  name                String           @db.VarChar(150)
+  father_mother_name  String           @db.VarChar(150)
+  dob                 DateTime         @db.Date
+  gender              gender_enum
+  address             String
+  mobile              String           @unique @db.VarChar(10)
+  email               String           @unique @db.VarChar(150)
+  password_hash       String           @db.VarChar(255)
+  id_proof_type       id_proof_enum
+  id_proof_number     String           @unique @db.VarChar(50)
+  bank_account        String           @unique @db.VarChar(20)
+  ifsc_code           String           @db.VarChar(11)
+  bank_name           String?          @db.VarChar(150)
+  account_holder      String           @db.VarChar(150)
+  training_sector     String           @db.VarChar(100)
+  preferred_agency    String?          @db.VarChar(200)
+  application_status  app_status_enum? @default(PENDING)
+  mobile_verified     Boolean?         @default(false)
+  approved_by         String?          @db.Uuid
+  approved_at         DateTime?        @db.Timestamp(6)
+  rejection_reason    String?
+  created_at          DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?        @default(now()) @db.Timestamp(6)
+
+  @@index([bank_account], map: "idx_applicants_bank_account")
+  @@index([dob], map: "idx_applicants_dob")
+  @@index([id_proof_number], map: "idx_applicants_id_proof")
+  @@index([mobile], map: "idx_applicants_mobile")
+  @@index([training_sector], map: "idx_applicants_sector")
+  @@index([application_status], map: "idx_applicants_status")
 }
 
-model Agency {
-  id               String   @id @default(cuid())
-  loginId          String   @unique
-  password         String
-  orgName          String
-  orgType          String
-  yearEstablished  String
-  contactPersonName String
-  contactPersonDesignation String
-  mobileNumber String
-  alternateMobile  String?
-  emailId          String
-  website          String?
-  registeredOfficeAddress String
-  district         String
-  pincode          String
-  trainingCentreAddress String
-  registrationNumber String
-  registrationDate DateTime
-  registeredUnder  String
-  panNumber        String
-  tanNumber        String?
-  gstNumber        String?
-  udyamNumber      String?
-  bankAccountNumber String
-  ifscCode         String
-  bankName         String
-  accountHolderName String
-  branchName       String?
-  empanelledWithNSDC Boolean @default(false)
-  empanelledWithDKVIB Boolean @default(false)
-  nsdcRegNumber    String?
-  previousDKVIBWork String?
-  empanelledWithSkillIndia Boolean @default(false)
-  blacklistingHistory Boolean @default(false)
-  trainingCentreOwnership String
-  totalTrainingSpace String
-  numberOfTrainingRooms String
-  seatingCapacity  String
-  facilities       Json     @default("[]")
-  sectors          Json     @default("[]")
-  maxBatchesPerMonth String
-  maxTraineesPerBatch String
-  trainers         Json     @default("[]")
-  totalYearsInTraining String
-  totalTraineesTrained String
-  previousProjects String?
-  achievements     String?
-  documents        Json     @default("{}")
-  authorizedSignatoryName String?
-  authorizedSignatoryDesignation String?
-  declarationDate  DateTime?
-  status           String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+model otp_store {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email      String    @db.VarChar(150)
+  mobile     String?   @db.VarChar(10)
+  otp        String    @db.VarChar(6)
+  purpose    String?   @default("REGISTRATION") @db.VarChar(50)
+  expires_at DateTime  @db.Timestamp(6)
+  verified   Boolean?  @default(false)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([email, purpose], map: "idx_otp_email")
 }
 
-model Applicant {
-  id               String   @id @default(cuid())
-  loginId          String   @unique
-  password         String
-  name             String
-  fatherMotherName String
-  dob              DateTime
-  gender           String
-  address          String
-  mobile           String
-  email            String
-  idProofType      String
-  idProofNumber    String
-  bankAccount      String
-  ifscCode         String
-  bankName         String?
-  accountHolder    String
-  trainingSector   String
-  preferredAgency  String?
-  status           String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+enum admin_role_enum {
+  SUPER_ADMIN
+  DKVIB_ADMIN
+  FINANCE_OFFICER
+  ASSESSMENT_OFFICER
+}
+
+model admins {
+  id              String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  admin_id        String           @unique @db.VarChar(20)
+  name            String           @db.VarChar(150)
+  email           String           @unique @db.VarChar(150)
+  password_hash   String           @db.VarChar(255)
+  role            admin_role_enum  @default(DKVIB_ADMIN)
+  status          String           @default("ACTIVE") @db.VarChar(20)
+  created_at      DateTime?        @default(now()) @db.Timestamp(6)
+  
+  @@index([email], map: "idx_admins_email")
+}
+
+model agencies {
+  id                          String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  login_id                    String           @unique @db.VarChar(20)
+  password_hash               String           @db.VarChar(255)
+  org_name                    String           @db.VarChar(200)
+  org_type                    String           @db.VarChar(50)
+  year_established            String?          @db.VarChar(4)
+  contact_person_name         String           @db.VarChar(100)
+  contact_person_designation  String           @db.VarChar(100)
+  mobile_number               String           @db.VarChar(10)
+  alternate_mobile            String?          @db.VarChar(10)
+  email_id                    String           @unique @db.VarChar(150)
+  website                     String?          @db.VarChar(200)
+  registered_office_address   String
+  district                    String           @db.VarChar(100)
+  pincode                     String           @db.VarChar(6)
+  training_center_address     String
+  registration_number         String           @db.VarChar(100)
+  registration_date           DateTime         @db.Date
+  registered_under            String           @db.VarChar(100)
+  pan_number                  String           @unique @db.VarChar(10)
+  tan_number                  String?          @db.VarChar(10)
+  gst_number                  String?          @db.VarChar(15)
+  udyam_number                String?          @db.VarChar(20)
+  bank_account_number         String           @db.VarChar(20)
+  ifsc_code                   String           @db.VarChar(11)
+  bank_name                   String           @db.VarChar(150)
+  account_holder_name         String           @db.VarChar(150)
+  branch_name                 String?          @db.VarChar(150)
+  empanelled_with_nsdc        Boolean?         @default(false)
+  empanelled_with_dkkvy       Boolean?         @default(false)
+  nsdc_reg_number             String?          @db.VarChar(50)
+  previous_dkkvy_work         String?
+  empanelled_with_skill_india Boolean?         @default(false)
+  blacklisting_history        Boolean?         @default(false)
+  training_center_ownership   String           @db.VarChar(50)
+  total_training_space        String           @db.VarChar(20)
+  number_of_training_rooms    String           @db.VarChar(10)
+  seating_capacity            String           @db.VarChar(10)
+  facilities                  Json             @default("[]")
+  sectors                     Json             @default("[]")
+  max_batches_per_month       String           @db.VarChar(10)
+  max_trainees_per_batch      String           @db.VarChar(10)
+  trainers                    Json             @default("[]")
+  total_years_in_training     String?          @db.VarChar(10)
+  total_trainees_trained      String?          @db.VarChar(20)
+  previous_projects           String?
+  achievements                String?
+  documents                   Json             @default("{}")
+  authorized_signatory_name   String?          @db.VarChar(100)
+  authorized_signatory_designation String?     @db.VarChar(100)
+  declaration_date            DateTime?        @db.Date
+  status                      app_status_enum? @default(PENDING)
+  created_at                  DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at                  DateTime?        @default(now()) @db.Timestamp(6)
+
+  @@index([status], map: "idx_agencies_status")
+  @@index([email_id], map: "idx_agencies_email")
+}
+
+enum app_status_enum {
+  PENDING
+  APPROVED
+  ACTIVE
+  COMPLETED
+  REJECTED
+}
+
+enum gender_enum {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum id_proof_enum {
+  AADHAAR
+  VOTER_ID
+  PAN
+  DRIVING_LICENCE
 }

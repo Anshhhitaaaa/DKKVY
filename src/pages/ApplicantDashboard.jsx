@@ -1,11 +1,39 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import api from '../services/api';
 
 const ApplicantDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [applicant, setApplicant] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchApplicant = async () => {
+      try {
+        console.log('Checking localStorage user:', JSON.parse(localStorage.getItem('user')));
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.applicant_id) {
+          console.log('Fetching applicant with ID:', user.applicant_id);
+          const response = await api.get(`/applicants/${user.applicant_id}`);
+          console.log('Applicant data:', response.data.data);
+          setApplicant(response.data.data);
+        } else if (user) {
+          // If we already have the user from login, just use that
+          console.log('Using user from localStorage:', user);
+          setApplicant(user);
+        }
+      } catch (error) {
+        console.error('Error fetching applicant:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplicant();
+  }, []);
 
   const scrollToSection = (sectionId) => {
     setActiveTab(sectionId);
@@ -93,6 +121,14 @@ const ApplicantDashboard = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-2xl font-bold text-gray-800">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left Sidebar */}
@@ -100,11 +136,11 @@ const ApplicantDashboard = () => {
         {/* Sidebar Header */}
         <div className="p-6 border-b border-gray-700">
           <div className="w-16 h-16 bg-gradient-to-r from-[#FF6B00] to-orange-600 rounded-full flex items-center justify-center text-2xl font-bold mb-3">
-            RS
+            {applicant?.name?.charAt(0) || 'A'}
           </div>
-          <h3 className="text-lg font-bold">Riya Sharma</h3>
-          <p className="text-blue-300 text-sm">DKKVY202600143</p>
-          <p className="text-gray-400 text-xs mt-1">Tailoring Trade</p>
+          <h3 className="text-lg font-bold">{applicant?.name || 'Applicant'}</h3>
+          <p className="text-blue-300 text-sm">{applicant?.applicant_id || ''}</p>
+          <p className="text-gray-400 text-xs mt-1">{applicant?.training_sector || ''}</p>
         </div>
 
         {/* Sidebar Links */}
@@ -166,13 +202,13 @@ const ApplicantDashboard = () => {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="w-10 h-10 bg-gradient-to-r from-[#FF6B00] to-orange-600 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition-all"
               >
-                RS
+                {applicant?.name?.charAt(0) || 'A'}
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
                   <div className="p-4 border-b border-gray-200">
-                    <p className="font-bold text-gray-900">Riya Sharma</p>
-                    <p className="text-sm text-gray-500">DKKVY202600143</p>
+                    <p className="font-bold text-gray-900">{applicant?.name || 'Applicant'}</p>
+                    <p className="text-sm text-gray-500">{applicant?.applicant_id || ''}</p>
                   </div>
                   <button
                     onClick={() => {
@@ -204,16 +240,15 @@ const ApplicantDashboard = () => {
         <div className="p-6 space-y-6 overflow-auto">
           {/* Section 1: Welcome Banner */}
           <section id="dashboard" className="bg-gradient-to-r from-[#FF6B00] to-[#D4A017] p-8 rounded-2xl shadow-lg text-white">
-            <h2 className="text-3xl font-extrabold mb-3">👋 Welcome back, Riya Sharma!</h2>
+            <h2 className="text-3xl font-extrabold mb-3">👋 Welcome back, {applicant?.name || 'Applicant'}!</h2>
             <div className="flex flex-wrap gap-4 text-lg mb-6">
-              <p>Applicant ID: <span className="font-bold">DKKVY202600143</span></p>
+              <p>Applicant ID: <span className="font-bold">{applicant?.applicant_id || ''}</span></p>
               <span className="hidden sm:inline">|</span>
-              <p>Applied: <span className="font-semibold">01 Jun 2026</span></p>
+              <p>Applied: <span className="font-semibold">{applicant?.created_at ? new Date(applicant.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span></p>
             </div>
             <div className="flex flex-wrap gap-6 mb-6 text-lg">
-              <p>Training: <span className="font-semibold">Tailoring Trade</span></p>
-              <p>Batch: <span className="font-semibold">TAI-001</span></p>
-              <p>Agency: <span className="font-semibold">Skill India Foundation</span></p>
+              <p>Training: <span className="font-semibold">{applicant?.training_sector || ''}</span></p>
+              {applicant?.preferred_agency && <p>Agency: <span className="font-semibold">{applicant.preferred_agency}</span></p>}
             </div>
             <button className="px-8 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-[#FF6B00] transition-all">
               📥 Download Admit Card
@@ -226,34 +261,36 @@ const ApplicantDashboard = () => {
             {/* Application Status Card */}
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Application</h3>
-              <div className="text-5xl mb-3">✅</div>
-              <p className="text-2xl font-bold text-gray-800">Approved</p>
-              <p className="text-gray-500 mt-2">01 Jun 2026</p>
+              <div className="text-5xl mb-3">
+                {applicant?.application_status === 'APPROVED' || applicant?.application_status === 'ACTIVE' ? '✅' :
+                 applicant?.application_status === 'REJECTED' ? '❌' : '⏳'}
+              </div>
+              <p className="text-2xl font-bold text-gray-800">
+                {applicant?.application_status || 'Pending'}
+              </p>
+              {applicant?.approved_at && (
+                <p className="text-gray-500 mt-2">
+                  {new Date(applicant.approved_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </p>
+              )}
             </div>
             {/* Batch Status Card */}
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Batch</h3>
               <div className="text-5xl mb-3">🏫</div>
-              <p className="text-2xl font-bold text-gray-800">Assigned</p>
-              <p className="text-gray-500 mt-2">TAI-001</p>
-              <p className="text-gray-500 text-sm">10–21 Jun</p>
+              <p className="text-2xl font-bold text-gray-800">Pending</p>
             </div>
             {/* Attendance Card */}
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Attendance</h3>
               <div className="text-5xl mb-3">📅</div>
-              <p className="text-2xl font-bold text-gray-800">9 / 12</p>
-              <p className="text-gray-500 mt-2">75%</p>
-              <div className="w-full h-3 bg-gray-200 rounded-full mt-3 overflow-hidden">
-                <div className="w-3/4 h-full bg-gradient-to-r from-[#FF6B00] to-[#D4A017]"></div>
-              </div>
+              <p className="text-2xl font-bold text-gray-800">N/A</p>
             </div>
             {/* Stipend Card */}
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
               <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Stipend</h3>
               <div className="text-5xl mb-3">💰</div>
               <p className="text-2xl font-bold text-orange-600">Pending</p>
-              <p className="text-gray-500 mt-2">₹1,600 due</p>
             </div>
           </section>
 

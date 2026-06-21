@@ -1,16 +1,16 @@
 
 // src/pages/ApplicantList.jsx
-import Layout from '../components/Layout';
+import AdminLayout from '../components/AdminLayout';
 import { useSelector } from 'react-redux';
 
 const ApplicantList = () => {
   const { applicants, loading, error } = useSelector((state) => state.applicants);
 
-  if (loading) return <Layout><div className="text-center py-20 text-xl text-gray-700">Loading...</div></Layout>;
-  if (error) return <Layout><div className="text-center py-20 text-xl text-red-600">Error: {error}</div></Layout>;
+  if (loading) return <AdminLayout title="Applicants"><div className="text-center py-20 text-xl text-gray-700">Loading...</div></AdminLayout>;
+  if (error) return <AdminLayout title="Applicants"><div className="text-center py-20 text-xl text-red-600">Error: {error}</div></AdminLayout>;
 
   return (
-    <Layout>
+    <AdminLayout title="Applicants Management">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-3xl font-bold text-gray-900">Applicant Management</h2>
@@ -53,7 +53,7 @@ const ApplicantList = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 

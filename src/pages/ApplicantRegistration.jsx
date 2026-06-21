@@ -79,30 +79,49 @@ const ApplicantRegistration = () => {
     }
   };
 
-  const handleSendOtp = (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    // Mock API call
-    alert(`OTP sent to ${formData.email} (Demo OTP: 123456)`);
-    setCurrentStep(2);
-    setTimer(60);
-    setCanResend(false);
-  };
-
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    const enteredOtp = otp.join('');
-    if (enteredOtp === '123456') {
-      setCurrentStep(3);
-    } else {
-      alert('Invalid OTP! Please enter 123456');
+    try {
+      const response = await api.post('/auth/send-otp', {
+        email: formData.email,
+        mobile: formData.mobile
+      });
+      alert(`OTP sent to ${formData.email} (Demo OTP: 123456)`);
+      setCurrentStep(2);
+      setTimer(60);
+      setCanResend(false);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to send OTP');
     }
   };
 
-  const handleResendOtp = () => {
-    setTimer(60);
-    setCanResend(false);
-    setOtp(['', '', '', '', '', '']);
-    alert(`OTP resent to ${formData.email} (Demo OTP: 123456)`);
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    const enteredOtp = otp.join('');
+    try {
+      const response = await api.post('/auth/verify-otp', {
+        email: formData.email,
+        otp: enteredOtp
+      });
+      setCurrentStep(3);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Invalid OTP! Please enter 123456');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const response = await api.post('/auth/send-otp', {
+        email: formData.email,
+        mobile: formData.mobile
+      });
+      setTimer(60);
+      setCanResend(false);
+      setOtp(['', '', '', '', '', '']);
+      alert(`OTP resent to ${formData.email} (Demo OTP: 123456)`);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to resend OTP');
+    }
   };
 
   const handleSubmitApplication = async (e) => {
@@ -238,9 +257,9 @@ const ApplicantRegistration = () => {
                     required
                   >
                     <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
                   </select>
                 </div>
                 <div className="md:col-span-2">
@@ -389,11 +408,10 @@ const ApplicantRegistration = () => {
                     required
                   >
                     <option value="">Select ID Proof</option>
-                    <option value="Aadhaar Card">Aadhaar Card</option>
-                    <option value="PAN Card">PAN Card</option>
-                    <option value="Voter ID">Voter ID</option>
-                    <option value="Passport">Passport</option>
-                    <option value="Driving License">Driving License</option>
+                    <option value="AADHAAR">Aadhaar Card</option>
+                    <option value="PAN">PAN Card</option>
+                    <option value="VOTER_ID">Voter ID</option>
+                    <option value="DRIVING_LICENCE">Driving License</option>
                   </select>
                 </div>
                 <div>

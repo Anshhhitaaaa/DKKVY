@@ -1,6 +1,6 @@
 
 // src/pages/Reports.jsx
-import Layout from '../components/Layout';
+import AdminLayout from '../components/AdminLayout';
 import { useSelector } from 'react-redux';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -63,7 +63,7 @@ const Reports = () => {
   };
 
   return (
-    <Layout>
+    <AdminLayout title="MIS Reports">
       <div className="space-y-8">
         <h2 className="text-3xl font-bold text-gray-900">MIS Reports</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -92,7 +92,7 @@ const Reports = () => {
           ))}
         </div>
       </div>
-    </Layout>
+    </AdminLayout>
   );
 };
 

@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   LineChart, Line, AreaChart, Area
 } from 'recharts';
+import AdminLayout from '../components/AdminLayout';
 
 // Sector-wise enrollment data
 const sectorEnrollmentData = [
@@ -59,136 +60,9 @@ const districtData = [
 ];
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Left Sidebar */}
-      <aside className="w-64 bg-[#0A2240] text-white flex flex-col shadow-xl">
-        <div className="p-6 border-b border-gray-700">
-          <div className="w-16 h-16 bg-gradient-to-r from-[#FF6B00] to-orange-600 rounded-full flex items-center justify-center text-3xl font-bold mb-3 mx-auto">
-            SA
-          </div>
-          <h3 className="text-lg font-bold text-center">Sanjay Aggarwal</h3>
-          <p className="text-blue-200 text-sm text-center">DKVIB Admin</p>
-          <p className="text-green-400 text-sm text-center mt-1">Super Admin</p>
-        </div>
-
-        <nav className="flex-1 py-4">
-          {[
-            { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-            { id: 'applicants', icon: '👥', label: 'Applicants' },
-            { id: 'agencies', icon: '🏢', label: 'Agencies' },
-            { id: 'batches', icon: '📅', label: 'Batches' },
-            { id: 'attendance', icon: '✅', label: 'Attendance' },
-            { id: 'assessment', icon: '📝', label: 'Assessment' },
-            { id: 'stipend', icon: '💰', label: 'Stipend' },
-            { id: 'payments', icon: '💳', label: 'Payments' },
-            { id: 'certificates', icon: '🎓', label: 'Certificates' },
-            { id: 'benefits', icon: '🎁', label: 'Benefits' },
-            { id: 'catalogue', icon: '🛍', label: 'e-Catalogue' },
-            { id: 'sectors', icon: '🎯', label: 'Sectors' },
-            { id: 'reports', icon: '📊', label: 'MIS Reports' },
-            { id: 'audit', icon: '🛡', label: 'Audit Trail' },
-            { id: 'notifications', icon: '🔔', label: 'Notifications' },
-            { id: 'settings', icon: '⚙️', label: 'Settings' },
-            { id: 'users', icon: '👤', label: 'User Mgmt' }
-          ].map((item) => (
-            <button
-              key={item.id}
-              className={`w-full flex items-center gap-3 px-6 py-3 text-left hover:bg-gray-800 transition-all ${
-                item.id === 'dashboard' ? 'border-l-4 border-[#FF6B00] text-[#FF6B00] bg-gray-800' : 'text-gray-300'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="font-medium">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-gray-700">
-          <button
-            onClick={() => {
-              localStorage.removeItem('user');
-              localStorage.removeItem('accessToken');
-              navigate('/');
-            }}
-            className="w-full flex items-center gap-3 px-6 py-3 hover:bg-gray-800 text-gray-300 transition-all rounded-lg"
-          >
-            <span className="text-xl">🚪</span>
-            <span className="font-medium">Logout</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col">
-        {/* Top Navbar */}
-        <header className="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
-          <div className="flex items-center gap-4">
-            <button className="text-2xl text-gray-700">≡</button>
-            <div className="flex items-center gap-3">
-              <div className="text-3xl">🏛</div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">DKKVY Admin Portal</h2>
-                <p className="text-sm text-gray-600">Delhi Khadi &amp; Village Industries Board</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-6">
-            <button className="relative text-gray-700 hover:text-gray-900">
-              <span className="text-2xl">🔔</span>
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">8</span>
-            </button>
-            <button className="text-gray-700 hover:text-gray-900 font-medium">हिंदी</button>
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-10 h-10 bg-gradient-to-r from-[#FF6B00] to-orange-600 rounded-full flex items-center justify-center text-white font-bold cursor-pointer hover:scale-105 transition-all"
-              >
-                SA
-              </button>
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
-                  <div className="p-4 border-b border-gray-200">
-                    <p className="font-bold text-gray-900">Sanjay Aggarwal</p>
-                    <p className="text-sm text-gray-500">Super Admin</p>
-                  </div>
-                  <button
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="text-xl">👤</span>
-                    <span className="font-medium text-gray-900">My Profile</span>
-                  </button>
-                  <button
-                    onClick={() => setIsDropdownOpen(false)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-                  >
-                    <span className="text-xl">🔒</span>
-                    <span className="font-medium text-gray-900">Change Password</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      localStorage.removeItem('user');
-                      localStorage.removeItem('accessToken');
-                      navigate('/');
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors border-t border-gray-100"
-                  >
-                    <span className="text-xl">🚪</span>
-                    <span className="font-medium text-gray-900">Logout</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content Scrollable */}
-        <div className="p-6 space-y-6 overflow-auto">
+    <AdminLayout title="DKKVY Admin Portal">
+      <div className="space-y-6">
           {/* Section 1: Top Alert Bar */}
           <section className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -524,9 +398,8 @@ const Dashboard = () => {
               ))}
             </div>
           </section>
-        </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 
