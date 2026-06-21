@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const trainingSectors = [
   'Tailoring Trade / Sewing',
@@ -38,6 +39,8 @@ const ApplicantRegistration = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [generatedLoginId, setGeneratedLoginId] = useState('');
   const navigate = useNavigate();
 
   // Timer for OTP resend
@@ -102,12 +105,19 @@ const ApplicantRegistration = () => {
     alert(`OTP resent to ${formData.email} (Demo OTP: 123456)`);
   };
 
-  const handleSubmitApplication = (e) => {
+  const handleSubmitApplication = async (e) => {
     e.preventDefault();
-    // Mock API call to POST /api/applicants
-    setTimeout(() => {
-      navigate('/registration/success');
-    }, 500);
+    setLoading(true);
+    try {
+      const { confirmPassword, ...submitData } = formData;
+      const response = await api.post('/auth/register/applicant', submitData);
+      setGeneratedLoginId(response.data.loginId);
+      setCurrentStep(5);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const steps = [
@@ -115,6 +125,7 @@ const ApplicantRegistration = () => {
     { num: 2, label: 'OTP Verify' },
     { num: 3, label: 'ID & Bank' },
     { num: 4, label: 'Training' },
+    { num: 5, label: 'Success' },
   ];
 
   return (
@@ -154,7 +165,29 @@ const ApplicantRegistration = () => {
             {currentStep === 2 && 'Step 2 — OTP Verification'}
             {currentStep === 3 && 'Step 3 — ID Proof & Bank Details'}
             {currentStep === 4 && 'Step 4 — Training Selection'}
+            {currentStep === 5 && 'Registration Successful!'}
           </h2>
+
+          {/* Step 5: Success */}
+          {currentStep === 5 && (
+            <div className="text-center space-y-6">
+              <div className="text-6xl mb-4">🎉</div>
+              <h3 className="text-2xl font-bold text-gray-900">Your Registration is Complete!</h3>
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-2xl border-2 border-blue-200">
+                <p className="text-lg text-gray-800 mb-2">Your Login ID has been generated:</p>
+                <div className="text-3xl font-extrabold text-blue-700 bg-white p-4 rounded-xl border-2 border-blue-300">
+                  {generatedLoginId}
+                </div>
+                <p className="text-sm text-gray-600 mt-2">Save this ID - you'll need it to log in!</p>
+              </div>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-10 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold text-lg shadow-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-xl transition-all transform hover:-translate-y-1"
+              >
+                Go to Login →
+              </button>
+            </div>
+          )}
 
           {/* Step 1: Personal Info Form */}
           {currentStep === 1 && (
@@ -487,9 +520,10 @@ const ApplicantRegistration = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-green-600 hover:to-green-700 hover:shadow-xl transition-all transform hover:-translate-y-1"
+                  disabled={loading}
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-green-600 hover:to-green-700 hover:shadow-xl transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:transform-none"
                 >
-                  Submit Application
+                  {loading ? 'Submitting...' : 'Submit Application'}
                 </button>
               </div>
             </form>

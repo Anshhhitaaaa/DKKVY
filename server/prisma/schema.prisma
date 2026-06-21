@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  loginId   String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Agency {
+  id               String   @id @default(cuid())
+  loginId          String   @unique
+  password         String
+  orgName          String
+  orgType          String
+  yearEstablished  String
+  contactPersonName String
+  contactPersonDesignation String
+  mobileNumber String
+  alternateMobile  String?
+  emailId          String
+  website          String?
+  registeredOfficeAddress String
+  district         String
+  pincode          String
+  trainingCentreAddress String
+  registrationNumber String
+  registrationDate DateTime
+  registeredUnder  String
+  panNumber        String
+  tanNumber        String?
+  gstNumber        String?
+  udyamNumber      String?
+  bankAccountNumber String
+  ifscCode         String
+  bankName         String
+  accountHolderName String
+  branchName       String?
+  empanelledWithNSDC Boolean @default(false)
+  empanelledWithDKVIB Boolean @default(false)
+  nsdcRegNumber    String?
+  previousDKVIBWork String?
+  empanelledWithSkillIndia Boolean @default(false)
+  blacklistingHistory Boolean @default(false)
+  trainingCentreOwnership String
+  totalTrainingSpace String
+  numberOfTrainingRooms String
+  seatingCapacity  String
+  facilities       Json     @default("[]")
+  sectors          Json     @default("[]")
+  maxBatchesPerMonth String
+  maxTraineesPerBatch String
+  trainers         Json     @default("[]")
+  totalYearsInTraining String
+  totalTraineesTrained String
+  previousProjects String?
+  achievements     String?
+  documents        Json     @default("{}")
+  authorizedSignatoryName String?
+  authorizedSignatoryDesignation String?
+  declarationDate  DateTime?
+  status           String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Applicant {
+  id               String   @id @default(cuid())
+  loginId          String   @unique
+  password         String
+  name             String
+  fatherMotherName String
+  dob              DateTime
+  gender           String
+  address          String
+  mobile           String
+  email            String
+  idProofType      String
+  idProofNumber    String
+  bankAccount      String
+  ifscCode         String
+  bankName         String?
+  accountHolder    String
+  trainingSector   String
+  preferredAgency  String?
+  status           String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

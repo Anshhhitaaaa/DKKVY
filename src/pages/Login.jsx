@@ -1,15 +1,15 @@
 
-// src/pages/Login.jsx
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { login, clearError } from '../redux/authSlice';
+import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
+import api from '../services/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({ loginId: '', password: '', role: 'DKKVY_ADMIN' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,39 +17,32 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     
-    let mockUser = null;
-    if (formData.role === 'DKKVY_ADMIN' && formData.loginId === 'ADMIN-001' && formData.password === 'test123') {
-      mockUser = { id: '1', name: 'Test Admin', role: 'DKKVY_ADMIN' };
-    } else if (formData.role === 'AGENCY' && formData.loginId === 'AGENCY-001' && formData.password === 'agency123') {
-      mockUser = { id: '2', name: 'Test Agency', role: 'AGENCY' };
-    } else if (formData.role === 'APPLICANT' && formData.loginId === 'APPLICANT-001' && formData.password === 'applicant123') {
-      mockUser = { id: '3', name: 'Test Applicant', role: 'APPLICANT' };
-    } else {
-      alert(`Invalid credentials! Use:\n- Admin: ADMIN-001 / test123\n- Agency: AGENCY-001 / agency123\n- Applicant: APPLICANT-001 / applicant123`);
-      return;
-    }
-    
-    dispatch({ 
-      type: 'auth/login/fulfilled', 
-      payload: { 
-        user: mockUser, 
-        accessToken: 'mock-token', 
-        refreshToken: 'mock-refresh' 
-      } 
-    });
-    
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    localStorage.setItem('accessToken', 'mock-token');
-    localStorage.setItem('refreshToken', 'mock-refresh');
-    
-    // Redirect to appropriate dashboard based on role
-    if (mockUser.role === 'AGENCY') {
-      navigate('/agency-dashboard');
-    } else if (mockUser.role === 'APPLICANT') {
-      navigate('/applicant-dashboard');
-    } else {
-      navigate('/dashboard');
+    try {
+      const response = await api.post('/auth/login', formData);
+      const { token, user, role } = response.data;
+      
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('accessToken', token);
+      
+      dispatch({
+        type: 'auth/login/fulfilled',
+        payload: { user, accessToken: token, refreshToken: 'mock-refresh' }
+      });
+
+      if (role === 'AGENCY') {
+        navigate('/agency-dashboard');
+      } else if (role === 'APPLICANT') {
+        navigate('/applicant-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,20 +62,10 @@ const Login = () => {
           <p className="text-gray-600">Sign in to access your account</p>
         </div>
         
-        {/* Test Credentials Box */}
-        <div className="mb-8 p-5 bg-blue-50 border-2 border-blue-200 rounded-xl">
-          <p className="text-sm font-semibold text-blue-800 mb-3">Test Credentials:</p>
-          <ul className="text-sm text-blue-700 space-y-2">
-            <li><strong>Admin:</strong> ADMIN-001 / test123</li>
-            <li><strong>Agency:</strong> AGENCY-001 / agency123</li>
-            <li><strong>Applicant:</strong> APPLICANT-001 / applicant123</li>
-          </ul>
-        </div>
-
         {error && (
           <div className="bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-xl mb-6 flex items-center justify-between">
             {error}
-            <button onClick={() => dispatch(clearError())} className="font-bold">×</button>
+            <button onClick={() => setError('')} className="font-bold">×</button>
           </div>
         )}
 
@@ -108,7 +91,7 @@ const Login = () => {
               value={formData.loginId}
               onChange={handleChange}
               className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-              placeholder="Enter your login ID"
+              placeholder="Enter your Login ID"
               required
             />
           </div>

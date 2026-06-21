@@ -1,9 +1,12 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const AgencyRegistration = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [generatedLoginId, setGeneratedLoginId] = useState('');
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -131,12 +134,22 @@ const AgencyRegistration = () => {
     }]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/registration/success');
+    setLoading(true);
+    try {
+      const { confirmPassword, sameAsRegisteredOffice, trainers, ...submitData } = formData;
+      const response = await api.post('/auth/register/agency', {...submitData, trainers});
+      setGeneratedLoginId(response.data.loginId);
+      setCurrentStep(6);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4">
@@ -153,6 +166,7 @@ const AgencyRegistration = () => {
             { num: 3, label: 'Infrastructure' },
             { num: 4, label: 'Trainers' },
             { num: 5, label: 'Documents' },
+            { num: 6, label: 'Success' },
           ].map((step, index) => (
             <div key={step.num} className="flex flex-col items-center flex-1 relative">
               <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl transition-all ${
@@ -1190,11 +1204,32 @@ const AgencyRegistration = () => {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-10 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-xl rounded-xl shadow-lg hover:from-green-700 hover:to-green-800 transition-all transform hover:-translate-y-1"
+                  disabled={loading}
+                  className="px-10 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold text-xl rounded-xl shadow-lg hover:from-green-700 hover:to-green-800 transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:transform-none"
                 >
-                  Submit Application
+                  {loading ? 'Submitting...' : 'Submit Application'}
                 </button>
               </div>
+            </div>
+          )}
+          {/* Step 6 - Success */}
+          {currentStep === 6 && (
+            <div className="text-center space-y-6">
+              <div className="text-6xl mb-4">🎉</div>
+              <h3 className="text-2xl font-bold text-gray-900">Your Agency Registration is Complete!</h3>
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-2xl border-2 border-blue-200">
+                <p className="text-lg text-gray-800 mb-2">Your Agency Login ID has been generated:</p>
+                <div className="text-3xl font-extrabold text-blue-700 bg-white p-4 rounded-xl border-2 border-blue-300">
+                  {generatedLoginId}
+                </div>
+                <p className="text-sm text-gray-600 mt-2">Save this ID - you'll need it to log in! After admin approves your agency, you can login!</p>
+              </div>
+              <button
+                onClick={() => navigate('/login')}
+                className="px-10 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold text-xl shadow-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-xl transition-all transform hover:-translate-y-1"
+              >
+                Go to Login →
+              </button>
             </div>
           )}
         </div>
