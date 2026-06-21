@@ -416,7 +416,7 @@ const Home = () => {
           <div className="border-t border-white/20 pt-8 text-center text-blue-200">
             <p className="mb-2">© 2026 Delhi Khadi &amp; Village Industries Board</p>
             <p className="mb-2">Government of National Capital Territory of Delhi</p>
-            <p className="mb-2">Site designed &amp; developed by [Agency Name]</p>
+            <p className="mb-2">Site designed &amp; developed by Anshita Agrawal</p>
             <p>Last updated: June 2026 | Visitors: 1,24,832</p>
           </div>
         </div>
