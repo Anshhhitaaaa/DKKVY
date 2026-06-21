@@ -79,7 +79,7 @@ const ApplicantRegistration = () => {
   const handleSendOtp = (e) => {
     e.preventDefault();
     // Mock API call
-    alert(`OTP sent to ${formData.mobile} (Demo OTP: 123456)`);
+    alert(`OTP sent to ${formData.email} (Demo OTP: 123456)`);
     setCurrentStep(2);
     setTimer(60);
     setCanResend(false);
@@ -99,7 +99,7 @@ const ApplicantRegistration = () => {
     setTimer(60);
     setCanResend(false);
     setOtp(['', '', '', '', '', '']);
-    alert(`OTP resent to ${formData.mobile} (Demo OTP: 123456)`);
+    alert(`OTP resent to ${formData.email} (Demo OTP: 123456)`);
   };
 
   const handleSubmitApplication = (e) => {
@@ -235,7 +235,7 @@ const ApplicantRegistration = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-3">Email (Optional)</label>
+                  <label className="block text-sm font-bold text-gray-900 mb-3">Email *</label>
                   <input
                     type="email"
                     name="email"
@@ -243,6 +243,7 @@ const ApplicantRegistration = () => {
                     onChange={handleChange}
                     className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:border-[#FF6B00] focus:ring-4 focus:ring-orange-200 outline-none transition-all text-lg"
                     placeholder="Enter your email address"
+                    required
                   />
                 </div>
                 <div>
@@ -287,7 +288,7 @@ const ApplicantRegistration = () => {
             <form onSubmit={handleVerifyOtp} className="space-y-8 text-center">
               <div className="text-lg text-gray-700">
                 OTP sent to <span className="font-bold text-gray-900">{
-                  formData.mobile ? formData.mobile.slice(0, 4) + 'XXXXX' + formData.mobile.slice(9) : 'your mobile'
+                  formData.email ? formData.email.slice(0, 3) + 'XXX@' + formData.email.split('@')[1] : 'your email'
                 }</span>
               </div>
 
