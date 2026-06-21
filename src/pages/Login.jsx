@@ -6,7 +6,7 @@ import { login, clearError } from '../redux/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ mobile: '', password: '', role: 'DKKVY_ADMIN' });
+  const [formData, setFormData] = useState({ loginId: '', password: '', role: 'DKKVY_ADMIN' });
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth);
@@ -19,14 +19,14 @@ const Login = () => {
     e.preventDefault();
     
     let mockUser = null;
-    if (formData.role === 'DKKVY_ADMIN' && formData.mobile === '9876543210' && formData.password === 'test123') {
+    if (formData.role === 'DKKVY_ADMIN' && formData.loginId === 'ADMIN-001' && formData.password === 'test123') {
       mockUser = { id: '1', name: 'Test Admin', role: 'DKKVY_ADMIN' };
-    } else if (formData.role === 'AGENCY' && formData.mobile === '9999911111' && formData.password === 'agency123') {
+    } else if (formData.role === 'AGENCY' && formData.loginId === 'AGENCY-001' && formData.password === 'agency123') {
       mockUser = { id: '2', name: 'Test Agency', role: 'AGENCY' };
-    } else if (formData.role === 'APPLICANT' && formData.mobile === '9999922222' && formData.password === 'applicant123') {
+    } else if (formData.role === 'APPLICANT' && formData.loginId === 'APPLICANT-001' && formData.password === 'applicant123') {
       mockUser = { id: '3', name: 'Test Applicant', role: 'APPLICANT' };
     } else {
-      alert(`Invalid credentials! Use:\n- Admin: 9876543210 / test123\n- Agency: 9999911111 / agency123\n- Applicant: 9999922222 / applicant123`);
+      alert(`Invalid credentials! Use:\n- Admin: ADMIN-001 / test123\n- Agency: AGENCY-001 / agency123\n- Applicant: APPLICANT-001 / applicant123`);
       return;
     }
     
@@ -73,9 +73,9 @@ const Login = () => {
         <div className="mb-8 p-5 bg-blue-50 border-2 border-blue-200 rounded-xl">
           <p className="text-sm font-semibold text-blue-800 mb-3">Test Credentials:</p>
           <ul className="text-sm text-blue-700 space-y-2">
-            <li><strong>Admin:</strong> 9876543210 / test123</li>
-            <li><strong>Agency:</strong> 9999911111 / agency123</li>
-            <li><strong>Applicant:</strong> 9999922222 / applicant123</li>
+            <li><strong>Admin:</strong> ADMIN-001 / test123</li>
+            <li><strong>Agency:</strong> AGENCY-001 / agency123</li>
+            <li><strong>Applicant:</strong> APPLICANT-001 / applicant123</li>
           </ul>
         </div>
 
@@ -101,14 +101,14 @@ const Login = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">Mobile Number</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Login ID</label>
             <input
               type="text"
-              name="mobile"
-              value={formData.mobile}
+              name="loginId"
+              value={formData.loginId}
               onChange={handleChange}
               className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-              placeholder="Enter your mobile number"
+              placeholder="Enter your login ID"
               required
             />
           </div>
